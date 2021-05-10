@@ -1,0 +1,47 @@
+plugins {
+    id 'org.springframework.boot' version '2.4.5'
+    id 'io.spring.dependency-management' version '1.0.11.RELEASE'
+    id 'java'
+}
+
+group = 'com.exercise'
+version = '0.0.1-SNAPSHOT'
+sourceCompatibility = '1.8'
+
+configurations {
+    compileOnly {
+        extendsFrom annotationProcessor
+    }
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.boot:spring-boot-starter-validation'
+    // https://mvnrepository.com/artifact/javax.validation/validation-api
+    implementation group: 'javax.validation', name: 'validation-api', version: '2.0.1.Final'
+    implementation 'org.jetbrains:annotations:20.1.0'
+    implementation group: 'io.springfox', name: 'springfox-swagger2', version: '2.6.1'
+    // https://mvnrepository.com/artifact/io.springfox/springfox-swagger-ui
+    implementation group: 'io.springfox', name: 'springfox-swagger-ui', version: '2.6.1'
+    compile group: 'org.mockito', name: 'mockito-core', version: '2.13.0'
+    compileOnly 'org.projectlombok:lombok'
+    runtimeOnly 'com.microsoft.sqlserver:mssql-jdbc'
+    annotationProcessor 'org.projectlombok:lombok'
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    // https://mvnrepository.com/artifact/io.rest-assured/rest-assured
+    testImplementation group: 'io.rest-assured', name: 'rest-assured', version: '4.1.1'
+    // https://mvnrepository.com/artifact/org.assertj/assertj-core
+    testImplementation group: 'org.assertj', name: 'assertj-core', version: '3.17.2'
+    testImplementation group: 'org.mockito', name: 'mockito-all', version: '1.10.19'
+    testCompile('org.junit.jupiter:junit-jupiter-engine:5.2.0')
+    testCompile('org.mockito:mockito-junit-jupiter:2.23.0')
+}
+
+test {
+    useJUnitPlatform()
+}
