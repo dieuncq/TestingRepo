@@ -67,4 +67,6 @@ public class Student implements Serializable {
     @Column(name = "last_modified_by")
     @LastModifiedBy
     private String last_modified_by;
+
+
 }

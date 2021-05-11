@@ -34,225 +34,153 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @ExtendWith(MockitoExtension.class)
 public class TestStudentController {
 
-//    @Test
-//    public void getStudentTest() {
-//        RestAssured.baseURI = "http://localhost:9090/api/student/";
+//    @Mock
+//    private StudentService studentService;
 //
-//        RequestSpecification httpRequest = RestAssured.given();
+//    @InjectMocks
+//    StudentController studentController = new StudentController();
 //
-//        Response response = httpRequest.request(Method.GET, "1");
+//    @Captor
+//    private ArgumentCaptor<Student> studentArgumentCaptor;
 //
-//        int statusCode = response.getStatusCode();
-//        Assertions.assertEquals(statusCode, 200);
+//    private List<Student> studentList;
+//
+//    @Autowired
+//    MockMvc mockMvc;
+//
+//    @BeforeEach
+//    public void setup() {
+//        this.studentList = new ArrayList<>();
+//        Student student = new Student();
+//        student.setId(69);
+//        student.setName("Nguyn Duy Tan");
+//        student.setEmail("tannd1904@gmail.com");
+//        student.setAddress("Ben Tre");
+//        student.setBirthday(LocalDate.of(1999,4,4));
+//        this.studentList.add(student);
+//
+//        mockMvc = MockMvcBuilders.standaloneSetup(studentController).build();
 //    }
 //
 //    @Test
-//    public void postStudentTest() throws JSONException {
-//        RestAssured.baseURI = "http://localhost:9090/api/student/";
+//    void shouldFetchAllUsers() throws Exception {
 //
-//        RequestSpecification httpRequest = RestAssured.given();
+//        given(userService.findAllUsers()).willReturn(userList);
 //
-//        JSONObject updateData = new JSONObject();
-//        updateData.put("name", "Nguyen Duy Tan");
-//        updateData.put("email", "tannd1904@gmail.com");
-//        updateData.put("address", "Ben Tre" );
-//        updateData.put("birthday", "1999-04-04");
+//        this.mockMvc.perform(get("/api/users"))
+//                .andExpect(status().isOk())
+//                .andExpect(jsonPath("$.size()", is(userList.size())));
+//    }
 //
-//        httpRequest.header("Content-Type", "application/json");
+//    @Test
+//    void shouldFetchOneUserById() throws Exception {
+//        final Long userId = 1L;
+//        final User user = new User(1L, "ten@mail.com","teten","teten");
 //
-//        httpRequest.body(updateData);
-//        Response response = httpRequest.request(Method.POST);
-//        int statusCode = response.getStatusCode();
-//        Assertions.assertEquals(statusCode, 200);
+//        given(userService.findUserById(userId)).willReturn(Optional.of(user));
 //
-//        JsonPath newData = response.jsonPath();
+//        this.mockMvc.perform(get("/api/users/{id}", userId))
+//                .andExpect(status().isOk())
+//                .andExpect(jsonPath("$.email", is(user.getEmail())))
+//                .andExpect(jsonPath("$.name", is(user.getName())));
+//    }
 //
+//    @Test
+//    void shouldReturn404WhenFindUserById() throws Exception {
+//        final Long userId = 1L;
+//        given(userService.findUserById(userId)).willReturn(Optional.empty());
+//
+//        this.mockMvc.perform(get("/api/user/{id}", userId))
+//                .andExpect(status().isNotFound());
+//    }
+//
+//    @Test
+//    void shouldCreateNewUser() throws Exception {
+//        given(userService.createUser(any(User.class))).willAnswer((invocation) -> invocation.getArgument(0));
+//
+//        User user = new User(null, "newuser1@gmail.com", "pwd", "Name");
+//
+//        this.mockMvc.perform(post("/api/users")
+//                .contentType(MediaType.APPLICATION_JSON_UTF8)
+//                .content(objectMapper.writeValueAsString(user)))
+//                .andExpect(status().isCreated())
+//                .andExpect(jsonPath("$.email", is(user.getEmail())))
+//                .andExpect(jsonPath("$.password", is(user.getPassword())))
+//                .andExpect(jsonPath("$.name", is(user.getName())))
+//        ;
+//    }
+//
+//    @Test
+//    void shouldReturn400WhenCreateNewUserWithoutEmail() throws Exception {
+//        User user = new User(null, null, "pwd", "Name");
+//
+//        this.mockMvc.perform(post("/api/users")
+//                .contentType(MediaType.APPLICATION_JSON_UTF8)
+//                .content(objectMapper.writeValueAsString(user)))
+//                .andExpect(status().isBadRequest())
+//                .andExpect(header().string("Content-Type", is("application/problem+json")))
+//                .andExpect(jsonPath("$.type", is("https://zalando.github.io/problem/constraint-violation")))
+//                .andExpect(jsonPath("$.title", is("Constraint Violation")))
+//                .andExpect(jsonPath("$.status", is(400)))
+//                .andExpect(jsonPath("$.violations", hasSize(1)))
+//                .andExpect(jsonPath("$.violations[0].field", is("email")))
+//                .andExpect(jsonPath("$.violations[0].message", is("Email should not be empty")))
+//                .andReturn()
+//        ;
+//    }
+//
+//    @Test
+//    void shouldUpdateUser() throws Exception {
+//        Long userId = 1L;
+//        User user = new User(userId, "user1@gmail.com", "pwd", "Name");
+//        given(userService.findUserById(userId)).willReturn(Optional.of(user));
+//        given(userService.updateUser(any(User.class))).willAnswer((invocation) -> invocation.getArgument(0));
+//
+//        this.mockMvc.perform(put("/api/users/{id}", user.getId())
+//                .contentType(MediaType.APPLICATION_JSON_UTF8)
+//                .content(objectMapper.writeValueAsString(user)))
+//                .andExpect(status().isOk())
+//                .andExpect(jsonPath("$.email", is(user.getEmail())))
+//                .andExpect(jsonPath("$.password", is(user.getPassword())))
+//                .andExpect(jsonPath("$.name", is(user.getName())));
 //
 //    }
 //
 //    @Test
-//    public void putStudentTest() throws JSONException {
-//        RestAssured.baseURI = "http://localhost:9090/api/student/";
+//    void shouldReturn404WhenUpdatingNonExistingUser() throws Exception {
+//        Long userId = 1L;
+//        given(userService.findUserById(userId)).willReturn(Optional.empty());
+//        User user = new User(userId, "user1@gmail.com", "pwd", "Name");
 //
-//        RequestSpecification httpRequest = RestAssured.given();
+//        this.mockMvc.perform(put("/api/users/{id}", userId)
+//                .contentType(MediaType.APPLICATION_JSON_UTF8)
+//                .content(objectMapper.writeValueAsString(user)))
+//                .andExpect(status().isNotFound());
 //
-//        JSONObject updateData = new JSONObject();
-//        updateData.put("name", "Nguyen Duy Tan");
-//        updateData.put("email", "tannd1904@gmail.com");
-//        updateData.put("address", "Ben Tre" );
-//        updateData.put("birthday", "1999-04-04");
-//
-//        httpRequest.body(updateData);
-//        Response response = httpRequest.request(Method.PUT, "11");
-//
-//        int statusCode = response.getStatusCode();
-//        Assertions.assertEquals(statusCode, 200);
-//
-//        JsonPath newData = response.jsonPath();
-//        String name = newData.get("name");
-//        Assertions.assertEquals(name, "Nguyen Duy Tan");
 //    }
 //
 //    @Test
-//    void deleteStudentTest() {
-//        RestAssured.baseURI = "http://localhost:9090/api/student/";
+//    void shouldDeleteUser() throws Exception {
+//        Long userId = 1L;
+//        User user = new User(userId, "user1@gmail.com", "pwd", "Name");
+//        given(userService.findUserById(userId)).willReturn(Optional.of(user));
+//        doNothing().when(userService).deleteUserById(user.getId());
 //
-//        RequestSpecification httpRequest = RestAssured.given();
+//        this.mockMvc.perform(delete("/api/users/{id}", user.getId()))
+//                .andExpect(status().isOk())
+//                .andExpect(jsonPath("$.email", is(user.getEmail())))
+//                .andExpect(jsonPath("$.password", is(user.getPassword())))
+//                .andExpect(jsonPath("$.name", is(user.getName())));
 //
-//        Response response = httpRequest.request(Method.DELETE, "14");
-//
-//        int statusCode = response.getStatusCode();
-//
-//        Assertions.assertEquals(statusCode, 204);
 //    }
-
-    @Mock
-    private StudentService studentService;
-
-    @InjectMocks
-    StudentController studentController = new StudentController();
-
-    @Captor
-    private ArgumentCaptor<Student> studentArgumentCaptor;
-
-    private List<Student> studentList;
-
-    @Autowired
-    MockMvc mockMvc;
-
-    @BeforeEach
-    public void setup() {
-        this.studentList = new ArrayList<>();
-        Student student = new Student();
-        student.setId(69);
-        student.setName("Nguyn Duy Tan");
-        student.setEmail("tannd1904@gmail.com");
-        student.setAddress("Ben Tre");
-        student.setBirthday(LocalDate.of(1999,4,4));
-        this.studentList.add(student);
-
-        mockMvc = MockMvcBuilders.standaloneSetup(studentController).build();
-    }
-
-    @Test
-    void shouldFetchAllUsers() throws Exception {
-
-        given(userService.findAllUsers()).willReturn(userList);
-
-        this.mockMvc.perform(get("/api/users"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.size()", is(userList.size())));
-    }
-
-    @Test
-    void shouldFetchOneUserById() throws Exception {
-        final Long userId = 1L;
-        final User user = new User(1L, "ten@mail.com","teten","teten");
-
-        given(userService.findUserById(userId)).willReturn(Optional.of(user));
-
-        this.mockMvc.perform(get("/api/users/{id}", userId))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.email", is(user.getEmail())))
-                .andExpect(jsonPath("$.name", is(user.getName())));
-    }
-
-    @Test
-    void shouldReturn404WhenFindUserById() throws Exception {
-        final Long userId = 1L;
-        given(userService.findUserById(userId)).willReturn(Optional.empty());
-
-        this.mockMvc.perform(get("/api/user/{id}", userId))
-                .andExpect(status().isNotFound());
-    }
-
-    @Test
-    void shouldCreateNewUser() throws Exception {
-        given(userService.createUser(any(User.class))).willAnswer((invocation) -> invocation.getArgument(0));
-
-        User user = new User(null, "newuser1@gmail.com", "pwd", "Name");
-
-        this.mockMvc.perform(post("/api/users")
-                .contentType(MediaType.APPLICATION_JSON_UTF8)
-                .content(objectMapper.writeValueAsString(user)))
-                .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.email", is(user.getEmail())))
-                .andExpect(jsonPath("$.password", is(user.getPassword())))
-                .andExpect(jsonPath("$.name", is(user.getName())))
-        ;
-    }
-
-    @Test
-    void shouldReturn400WhenCreateNewUserWithoutEmail() throws Exception {
-        User user = new User(null, null, "pwd", "Name");
-
-        this.mockMvc.perform(post("/api/users")
-                .contentType(MediaType.APPLICATION_JSON_UTF8)
-                .content(objectMapper.writeValueAsString(user)))
-                .andExpect(status().isBadRequest())
-                .andExpect(header().string("Content-Type", is("application/problem+json")))
-                .andExpect(jsonPath("$.type", is("https://zalando.github.io/problem/constraint-violation")))
-                .andExpect(jsonPath("$.title", is("Constraint Violation")))
-                .andExpect(jsonPath("$.status", is(400)))
-                .andExpect(jsonPath("$.violations", hasSize(1)))
-                .andExpect(jsonPath("$.violations[0].field", is("email")))
-                .andExpect(jsonPath("$.violations[0].message", is("Email should not be empty")))
-                .andReturn()
-        ;
-    }
-
-    @Test
-    void shouldUpdateUser() throws Exception {
-        Long userId = 1L;
-        User user = new User(userId, "user1@gmail.com", "pwd", "Name");
-        given(userService.findUserById(userId)).willReturn(Optional.of(user));
-        given(userService.updateUser(any(User.class))).willAnswer((invocation) -> invocation.getArgument(0));
-
-        this.mockMvc.perform(put("/api/users/{id}", user.getId())
-                .contentType(MediaType.APPLICATION_JSON_UTF8)
-                .content(objectMapper.writeValueAsString(user)))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.email", is(user.getEmail())))
-                .andExpect(jsonPath("$.password", is(user.getPassword())))
-                .andExpect(jsonPath("$.name", is(user.getName())));
-
-    }
-
-    @Test
-    void shouldReturn404WhenUpdatingNonExistingUser() throws Exception {
-        Long userId = 1L;
-        given(userService.findUserById(userId)).willReturn(Optional.empty());
-        User user = new User(userId, "user1@gmail.com", "pwd", "Name");
-
-        this.mockMvc.perform(put("/api/users/{id}", userId)
-                .contentType(MediaType.APPLICATION_JSON_UTF8)
-                .content(objectMapper.writeValueAsString(user)))
-                .andExpect(status().isNotFound());
-
-    }
-
-    @Test
-    void shouldDeleteUser() throws Exception {
-        Long userId = 1L;
-        User user = new User(userId, "user1@gmail.com", "pwd", "Name");
-        given(userService.findUserById(userId)).willReturn(Optional.of(user));
-        doNothing().when(userService).deleteUserById(user.getId());
-
-        this.mockMvc.perform(delete("/api/users/{id}", user.getId()))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.email", is(user.getEmail())))
-                .andExpect(jsonPath("$.password", is(user.getPassword())))
-                .andExpect(jsonPath("$.name", is(user.getName())));
-
-    }
-
-    @Test
-    void shouldReturn404WhenDeletingNonExistingUser() throws Exception {
-        Long userId = 1L;
-        given(userService.findUserById(userId)).willReturn(Optional.empty());
-
-        this.mockMvc.perform(delete("/api/users/{id}", userId))
-                .andExpect(status().isNotFound());
-
-    }
+//
+//    @Test
+//    void shouldReturn404WhenDeletingNonExistingUser() throws Exception {
+//        Long userId = 1L;
+//        given(userService.findUserById(userId)).willReturn(Optional.empty());
+//
+//        this.mockMvc.perform(delete("/api/users/{id}", userId))
+//                .andExpect(status().isNotFound());
+//
+//    }
 }
