@@ -92,5 +92,21 @@ public class StudentService implements Istudent{
         studentRepository.deleteById(id);
     }
 
+    public Optional<Student> findByName(String name) {
+        return studentRepository.findStudentByName(name);
+    }
+
+    public Optional<Student> findByNameAndAddress(String name, String address) {
+        return studentRepository.findStudentByNameAndAddress(name, address);
+    }
+
+    public Optional<Student> findByNameAndEmail(String name, String email) {
+        return studentRepository.findStudentByNameAndEmail(name, email);
+    }
+
+    public Optional<Student> findByNameAndEmailAndAddress(String name, String email, String address) {
+        return studentRepository.findStudentByNameAndEmailAndAddress(name, email, address);
+    }
+
 
 }

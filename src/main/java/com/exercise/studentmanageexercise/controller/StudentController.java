@@ -6,7 +6,9 @@ import com.exercise.studentmanageexercise.exception.StudentNotFoundException;
 import com.exercise.studentmanageexercise.mapper.StudentMapper;
 import com.exercise.studentmanageexercise.model.Student;
 import com.exercise.studentmanageexercise.service.StudentService;
+import io.swagger.annotations.ApiParam;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
@@ -14,7 +16,13 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import javax.validation.Valid;
 import javax.validation.constraints.Min;
 import java.net.URI;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api")
@@ -120,6 +128,57 @@ public class StudentController {
     @GetMapping("/students/get-by-age/{age}")
     public List<Student> getStudentByAge(@PathVariable int age) {
         return studentService.getStudentByAge(age);
+    }
+    
+    @GetMapping("/students/get-by")
+    public ResponseEntity<?> getStudentBy(@RequestParam HashMap<String, String> getStudentRequest) {
+
+        try {
+            String name = getStudentRequest.get("name");
+            String email = getStudentRequest.get("email");
+            String address = getStudentRequest.get("address");
+            String age_str = getStudentRequest.get("age");
+
+            Integer age = null;
+
+            if (age_str != null) {
+                age = Integer.parseInt(age_str);
+            } else {
+                age = 0;
+            }
+
+            Optional<Student> list = null;
+
+            if (name != null && email != null && address != null && getStudentRequest.get("age") == null) {
+                list = studentService.findByNameAndEmailAndAddress(name, email, address);
+                if (list.equals(null)) {
+                    throw new StudentNotFoundException("Student Not Found");
+                }
+            }
+            if (name != null && email == null && address == null && age_str == null) {
+                list = studentService.findByName(name);
+                if (list.equals(null)) {
+                    throw new StudentNotFoundException("Student Not Found");
+                }
+            }
+            if (name != null && email == null && address != null && age_str == null) {
+                list = studentService.findByNameAndAddress(name, address);
+                if (list.equals(null)) {
+                    throw new StudentNotFoundException("Student Not Found");
+                }
+            }
+            if (name != null && email != null && address == null && age_str == null) {
+                list = studentService.findByNameAndEmail(name, email);
+                if (list.equals(null)) {
+                    throw new StudentNotFoundException("Student Not Found");
+                }
+            }
+
+            return new ResponseEntity<>(list, HttpStatus.OK);
+        }
+        catch (Exception exception) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
     }
 
 }
