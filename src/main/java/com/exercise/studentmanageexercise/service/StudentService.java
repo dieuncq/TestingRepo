@@ -1,5 +1,6 @@
 package com.exercise.studentmanageexercise.service;
 
+import com.exercise.studentmanageexercise.exception.EmailExistedException;
 import com.exercise.studentmanageexercise.model.Student;
 import com.exercise.studentmanageexercise.repository.StudentRepository;
 import lombok.AllArgsConstructor;
@@ -70,4 +71,26 @@ public class StudentService implements Istudent{
     public List<Student> getStudentByAge(int age) {
         return studentRepository.getStudentByAge(age);
     }
+
+    public Student createStudent(Student student) {
+        Optional<Student> studentOptional = studentRepository.findStudentByEmail(student.getEmail());
+        if (studentOptional.isPresent()) {
+            throw new EmailExistedException("Email Has Already Existed");
+        }
+        return studentRepository.save(student);
+    }
+
+    public Student updateStudent(Student student) {
+        return studentRepository.save(student);
+    }
+
+    public List<Student> findAllStudents() {
+        return studentRepository.findAll();
+    }
+
+    public void deleteById(int id) {
+        studentRepository.deleteById(id);
+    }
+
+
 }

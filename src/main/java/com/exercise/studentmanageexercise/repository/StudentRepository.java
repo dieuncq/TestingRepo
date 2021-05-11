@@ -7,6 +7,7 @@ import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface StudentRepository extends JpaRepository<Student, Integer> {
@@ -22,5 +23,7 @@ public interface StudentRepository extends JpaRepository<Student, Integer> {
 
     @Query(value = "select s from Student s where (datediff(yy,s.birthday,getdate())) =:age")
     List<Student> getStudentByAge(int age);
+
+    Optional<Student> findStudentByEmail(String email);
 
 }

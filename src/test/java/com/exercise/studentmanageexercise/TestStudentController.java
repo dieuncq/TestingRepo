@@ -3,184 +3,181 @@ package com.exercise.studentmanageexercise;
 import com.exercise.studentmanageexercise.controller.StudentController;
 import com.exercise.studentmanageexercise.model.Student;
 import com.exercise.studentmanageexercise.service.StudentService;
-import io.restassured.RestAssured;
-import io.restassured.specification.RequestSpecification;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.hamcrest.CoreMatchers;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.BDDMockito;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.parsing.Problem;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.MediaType;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.RequestBuilder;
-import org.springframework.test.web.servlet.ResultMatcher;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.zalando.problem.jackson.ProblemModule;
+import org.zalando.problem.violations.ConstraintViolationProblemModule;
+import org.hamcrest.CoreMatchers.*;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
-import static io.restassured.RestAssured.get;
-import static io.restassured.RestAssured.given;
-import static org.assertj.core.internal.bytebuddy.matcher.ElementMatchers.fieldType;
-import static org.assertj.core.internal.bytebuddy.matcher.ElementMatchers.is;
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.doNothing;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@ExtendWith(MockitoExtension.class)
+@WebMvcTest(controllers = StudentController.class)
+@ActiveProfiles("test")
 public class TestStudentController {
 
-//    @Mock
-//    private StudentService studentService;
-//
-//    @InjectMocks
-//    StudentController studentController = new StudentController();
-//
-//    @Captor
-//    private ArgumentCaptor<Student> studentArgumentCaptor;
-//
-//    private List<Student> studentList;
-//
-//    @Autowired
-//    MockMvc mockMvc;
-//
-//    @BeforeEach
-//    public void setup() {
-//        this.studentList = new ArrayList<>();
-//        Student student = new Student();
-//        student.setId(69);
-//        student.setName("Nguyn Duy Tan");
-//        student.setEmail("tannd1904@gmail.com");
-//        student.setAddress("Ben Tre");
-//        student.setBirthday(LocalDate.of(1999,4,4));
-//        this.studentList.add(student);
-//
-//        mockMvc = MockMvcBuilders.standaloneSetup(studentController).build();
-//    }
-//
-//    @Test
-//    void shouldFetchAllUsers() throws Exception {
-//
-//        given(userService.findAllUsers()).willReturn(userList);
-//
-//        this.mockMvc.perform(get("/api/users"))
-//                .andExpect(status().isOk())
-//                .andExpect(jsonPath("$.size()", is(userList.size())));
-//    }
-//
-//    @Test
-//    void shouldFetchOneUserById() throws Exception {
-//        final Long userId = 1L;
-//        final User user = new User(1L, "ten@mail.com","teten","teten");
-//
-//        given(userService.findUserById(userId)).willReturn(Optional.of(user));
-//
-//        this.mockMvc.perform(get("/api/users/{id}", userId))
-//                .andExpect(status().isOk())
-//                .andExpect(jsonPath("$.email", is(user.getEmail())))
-//                .andExpect(jsonPath("$.name", is(user.getName())));
-//    }
-//
-//    @Test
-//    void shouldReturn404WhenFindUserById() throws Exception {
-//        final Long userId = 1L;
-//        given(userService.findUserById(userId)).willReturn(Optional.empty());
-//
-//        this.mockMvc.perform(get("/api/user/{id}", userId))
-//                .andExpect(status().isNotFound());
-//    }
-//
-//    @Test
-//    void shouldCreateNewUser() throws Exception {
-//        given(userService.createUser(any(User.class))).willAnswer((invocation) -> invocation.getArgument(0));
-//
-//        User user = new User(null, "newuser1@gmail.com", "pwd", "Name");
-//
-//        this.mockMvc.perform(post("/api/users")
-//                .contentType(MediaType.APPLICATION_JSON_UTF8)
-//                .content(objectMapper.writeValueAsString(user)))
-//                .andExpect(status().isCreated())
-//                .andExpect(jsonPath("$.email", is(user.getEmail())))
-//                .andExpect(jsonPath("$.password", is(user.getPassword())))
-//                .andExpect(jsonPath("$.name", is(user.getName())))
-//        ;
-//    }
-//
-//    @Test
-//    void shouldReturn400WhenCreateNewUserWithoutEmail() throws Exception {
-//        User user = new User(null, null, "pwd", "Name");
-//
-//        this.mockMvc.perform(post("/api/users")
-//                .contentType(MediaType.APPLICATION_JSON_UTF8)
-//                .content(objectMapper.writeValueAsString(user)))
-//                .andExpect(status().isBadRequest())
-//                .andExpect(header().string("Content-Type", is("application/problem+json")))
-//                .andExpect(jsonPath("$.type", is("https://zalando.github.io/problem/constraint-violation")))
-//                .andExpect(jsonPath("$.title", is("Constraint Violation")))
-//                .andExpect(jsonPath("$.status", is(400)))
-//                .andExpect(jsonPath("$.violations", hasSize(1)))
-//                .andExpect(jsonPath("$.violations[0].field", is("email")))
-//                .andExpect(jsonPath("$.violations[0].message", is("Email should not be empty")))
-//                .andReturn()
-//        ;
-//    }
-//
-//    @Test
-//    void shouldUpdateUser() throws Exception {
-//        Long userId = 1L;
-//        User user = new User(userId, "user1@gmail.com", "pwd", "Name");
-//        given(userService.findUserById(userId)).willReturn(Optional.of(user));
-//        given(userService.updateUser(any(User.class))).willAnswer((invocation) -> invocation.getArgument(0));
-//
-//        this.mockMvc.perform(put("/api/users/{id}", user.getId())
-//                .contentType(MediaType.APPLICATION_JSON_UTF8)
-//                .content(objectMapper.writeValueAsString(user)))
-//                .andExpect(status().isOk())
-//                .andExpect(jsonPath("$.email", is(user.getEmail())))
-//                .andExpect(jsonPath("$.password", is(user.getPassword())))
-//                .andExpect(jsonPath("$.name", is(user.getName())));
-//
-//    }
-//
-//    @Test
-//    void shouldReturn404WhenUpdatingNonExistingUser() throws Exception {
-//        Long userId = 1L;
-//        given(userService.findUserById(userId)).willReturn(Optional.empty());
-//        User user = new User(userId, "user1@gmail.com", "pwd", "Name");
-//
-//        this.mockMvc.perform(put("/api/users/{id}", userId)
-//                .contentType(MediaType.APPLICATION_JSON_UTF8)
-//                .content(objectMapper.writeValueAsString(user)))
-//                .andExpect(status().isNotFound());
-//
-//    }
-//
-//    @Test
-//    void shouldDeleteUser() throws Exception {
-//        Long userId = 1L;
-//        User user = new User(userId, "user1@gmail.com", "pwd", "Name");
-//        given(userService.findUserById(userId)).willReturn(Optional.of(user));
-//        doNothing().when(userService).deleteUserById(user.getId());
-//
-//        this.mockMvc.perform(delete("/api/users/{id}", user.getId()))
-//                .andExpect(status().isOk())
-//                .andExpect(jsonPath("$.email", is(user.getEmail())))
-//                .andExpect(jsonPath("$.password", is(user.getPassword())))
-//                .andExpect(jsonPath("$.name", is(user.getName())));
-//
-//    }
-//
-//    @Test
-//    void shouldReturn404WhenDeletingNonExistingUser() throws Exception {
-//        Long userId = 1L;
-//        given(userService.findUserById(userId)).willReturn(Optional.empty());
-//
-//        this.mockMvc.perform(delete("/api/users/{id}", userId))
-//                .andExpect(status().isNotFound());
-//
-//    }
+    @Autowired
+    private MockMvc mockMvc;
+
+    @MockBean
+    private StudentService studentService;
+
+    @Autowired
+    private ObjectMapper objectMapper;
+
+    private List<Student> studentList;
+
+    @BeforeEach
+    void setUp() {
+        this.studentList = new ArrayList<>();
+        this.studentList.add(new Student(1,"Tan", "tannd@gmail", "Ben Tre",
+                LocalDate.of(1999,4,4), LocalDateTime.now(),
+                "null", LocalDateTime.now(), "null"));
+        this.studentList.add(new Student(2,"Tan", "tannd@gmail", "Ben Tre",
+                LocalDate.of(1999,4,4), LocalDateTime.now(),
+                "null", LocalDateTime.now(), "null"));
+        this.studentList.add(new Student(3,"Tan", "tannd@gmail", "Ben Tre",
+                LocalDate.of(1999,4,4), LocalDateTime.now(),
+                "null", LocalDateTime.now(), "null"));
+
+        objectMapper.registerModule(new ProblemModule());
+        objectMapper.registerModule(new ConstraintViolationProblemModule());
+    }
+
+    @Test
+    void shouldFetchAllUsers() throws Exception {
+        BDDMockito.given(studentService.findAllStudents())
+                .willReturn(studentList);
+
+        this.mockMvc.perform(get("/api/students"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.size()", CoreMatchers.is(studentList.size())));
+    }
+
+    @Test
+    void shouldFetchOneStudentById() throws Exception {
+        final int id = 1;
+        final Student student = new Student(1,"Tan", "tannd@gmail", "Ben Tre",
+                LocalDate.of(1999,4,4), LocalDateTime.now(),
+                "null", LocalDateTime.now(), "null");
+
+        BDDMockito.given(studentService.findById(id)).willReturn(Optional.of(student));
+
+        this.mockMvc.perform(get("/api/student/{id}", id))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.email", CoreMatchers.is(student.getEmail())))
+                .andExpect(jsonPath("$.name", CoreMatchers.is(student.getName())));
+    }
+
+    @Test
+    void shouldReturn404WhenFindStudentById() throws Exception {
+        final int id = 1;
+
+        BDDMockito.given(studentService.findById(id))
+                .willReturn(Optional.empty());
+
+        this.mockMvc.perform(get("/api/student/{id}", id))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void shouldCreateNewStudent() throws Exception {
+        BDDMockito.given(studentService.createStudent(any(Student.class)))
+                .willAnswer(invocation -> invocation.getArgument(0));
+
+        Student student = new Student(1,"Tan", "tannd@gmail", "Ben Tre",
+                LocalDate.of(1999,4,4), LocalDateTime.now(),
+                "null", LocalDateTime.now(), "null");
+
+        this.mockMvc.perform(post("/api/student/")
+                .contentType(MediaType.APPLICATION_JSON_UTF8)
+                .content(objectMapper.writeValueAsString(student)))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.email",CoreMatchers.is(student.getEmail())))
+                .andExpect(jsonPath("$.name",CoreMatchers.is(student.getName())))
+                .andExpect(jsonPath("$.address",CoreMatchers.is(student.getAddress())));
+    }
+
+    @Test
+    void shouldUpdateStudent() throws Exception {
+        int id = 1;
+        Student student = new Student(1,"Tan", "tannd@gmail", "Ben Tre",
+                LocalDate.of(1999,4,4), LocalDateTime.now(),
+                "null", LocalDateTime.now(), "null");
+
+        BDDMockito.given(studentService.findById(id)).willReturn(Optional.of(student));
+
+        BDDMockito.given(studentService.updateStudent(any(Student.class))).willAnswer(
+                invocation -> invocation.getArgument(0));
+
+        this.mockMvc.perform(put("api/student/{id}", student.getId())
+                .contentType(MediaType.APPLICATION_JSON_UTF8)
+                .content(objectMapper.writeValueAsString(student)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.email",CoreMatchers.is(student.getEmail())))
+                .andExpect(jsonPath("$.name", CoreMatchers.is(student.getName())))
+                .andExpect(jsonPath("$.address", CoreMatchers.is(student.getAddress())));
+    }
+
+    @Test
+    void shouldReturn404WhenUpdatingNonExistingStudent() throws Exception {
+        int id = 1;
+        BDDMockito.given(studentService.findById(id)).willReturn(Optional.empty());
+
+        Student student = new Student(1,"Tan", "tannd@gmail", "Ben Tre",
+                LocalDate.of(1999,4,4), LocalDateTime.now(),
+                "null", LocalDateTime.now(), "null");
+
+        this.mockMvc.perform(put("api/student/{id}", id)
+                .contentType(MediaType.APPLICATION_JSON_UTF8)
+                .content(objectMapper.writeValueAsString(student)))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void shoulDeleteStudent() throws Exception {
+        int id = 1;
+        Student student = new Student(1,"Tan", "tannd@gmail", "Ben Tre",
+                LocalDate.of(1999,4,4), LocalDateTime.now(),
+                "null", LocalDateTime.now(), "null");
+
+        BDDMockito.given(studentService.findById(id)).willReturn(Optional.of(student));
+        doNothing().when(studentService).deleteById(student.getId());
+
+        this.mockMvc.perform(delete("api/student/{id}", student.getId()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.email", CoreMatchers.is(student.getEmail())))
+                .andExpect(jsonPath("$.name", CoreMatchers.is(student.getName())))
+                .andExpect(jsonPath("$.address", CoreMatchers.is(student.getAddress())));
+    }
+
+    @Test
+    void shouldReturn404WhenDeletingNonExistingStudent() throws Exception {
+        int id = 1;
+        BDDMockito.given(studentService.findById(id)).willReturn(Optional.empty());
+
+        this.mockMvc.perform(delete("/api/student/{id}", id))
+                .andExpect(status().isNotFound());
+    }
 }
+
